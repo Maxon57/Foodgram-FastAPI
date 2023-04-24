@@ -1,9 +1,8 @@
 import hashlib
-import os
 import uuid
 from datetime import datetime, timedelta
+from sqlite3 import IntegrityError
 from typing import List
-from typing_extensions import Annotated
 
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -70,7 +69,7 @@ class AuthUsers:
         try:
             payload = jwt.decode(
                 token,
-                settings.jwt_secret_key,
+                settings.authjwt_secret_key,
                 algorithms=[settings.jwt_algorithm]
             )
         except JWTError:
@@ -119,8 +118,10 @@ class AuthUsers:
             first_name=user_data.first_name,
             last_name=user_data.last_name
         )
+
         self.session.add(user)
         self.session.commit()
+
         return user
 
     def authenticate_user(self, email: str, password: str) -> auth.GetToken:
